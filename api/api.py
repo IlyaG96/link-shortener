@@ -2,7 +2,6 @@ from flask import Flask, request, Response, jsonify
 import requests
 from urllib.parse import urljoin
 
-
 app = Flask(__name__)
 
 links = {
@@ -24,12 +23,17 @@ def make_short_link():
         return "no args"
     return "done"
 
+
 @app.route('/api/v1/full', methods=['GET'])
 def get_short_link():
-    print(request.args.to_dict())
-    if request.args not in links:
+    if not request.args:
         return "error"
-    return "done"
+    query_params = request.args.to_dict()
+    link_id = query_params.get('id')
+    short_link = links.get(link_id)
+    if not short_link:
+        return "error"
+    return short_link
 
 
 """@app.route('/<path:path>', methods=["GET", "POST", "DELETE"])
