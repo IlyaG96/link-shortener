@@ -30,7 +30,7 @@ def write_link_db(full_link):
 def redirect_to_other_domain(link_id):
     url = redis.hget('test', link_id).decode()
     if not url:
-        return "not url"
+        return 'not url'
     return redirect(url)
 
 
@@ -40,24 +40,24 @@ def redirect_to_other_domain(link_id):
 @app.route('/api/v1/short', methods=['GET'])
 def make_short_link():
     if not request.args:
-        return "no args"
+        return 'no args'
 
     query_params = request.args.to_dict()
     full_link = query_params.get('link')
     link_id = write_link_db(full_link)
 
-    return link_id
+    return f'http://127.0.0.1/{link_id}'
 
 
 @app.route('/api/v1/full', methods=['GET'])
 def get_short_link():
     if not request.args:
-        return "error"
+        return 'error'
     query_params = request.args.to_dict()
     link_id = query_params.get('id')
     short_link = redis.hget('test', link_id)
     if not short_link:
-        return "error"
+        return 'error'
     return short_link
 
 
