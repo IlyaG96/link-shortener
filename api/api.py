@@ -1,6 +1,7 @@
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, Response, jsonify, redirect
 import requests
 from urllib.parse import urljoin
+from hashlib import sha256
 
 app = Flask(__name__)
 
@@ -11,17 +12,32 @@ links = {
 }
 
 
-@app.route('/', methods=['GET'])
-def index():
-    return "hello"
+def make_link_short(full_link):
+
+    global links
+    link_id = sha256(full_link.encode()).hexdigest()[:8]
+    links.update({link_id: full_link})
+
+    return link_id
+
+
+@app.route('/<path>', methods=['GET'])
+def redirect_to_other_domain(path):
+    url = links.get(path)
+    if not url:
+        return "not url"
+    return redirect(url)
 
 
 @app.route('/api/v1/short', methods=['GET'])
 def make_short_link():
-    print(request.args.to_dict())
     if not request.args:
         return "no args"
-    return "done"
+    query_params = request.args.to_dict()
+    full_link = query_params.get('link')
+    short_link = make_link_short(full_link)
+
+    return short_link
 
 
 @app.route('/api/v1/full', methods=['GET'])
