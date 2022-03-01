@@ -1,43 +1,52 @@
-from flask import Flask, request, Response, jsonify, redirect
-import requests
-from urllib.parse import urljoin
+from flask import Flask, request, redirect
+from environs import Env
 from hashlib import sha256
+from flask_redis import Redis
 
 app = Flask(__name__)
 
-links = {
-    "1": "https://mail.ru",
-    "12": "https://google.com",
-    "123": "https://vk.com"
-}
+env = Env()
+env.read_env()
+redis_host = env.str('REDIS_HOST')
+redis_port = env.str('REDIS_PORT')
+redis_password = env.str('REDIS_PASSWORD')
+app.config['REDIS_HOST'] = redis_host
+app.config['REDIS_PORT'] = redis_port
+app.config['REDIS_PASSWORD'] = redis_password
+
+redis = Redis(app)
+
+links = {}
 
 
-def make_link_short(full_link):
-
-    global links
+def write_link_db(full_link):
     link_id = sha256(full_link.encode()).hexdigest()[:8]
-    links.update({link_id: full_link})
+    redis.hset('test', link_id, full_link)
 
     return link_id
 
 
-@app.route('/<path>', methods=['GET'])
-def redirect_to_other_domain(path):
-    url = links.get(path)
+@app.route('/<link_id>', methods=['GET'])
+def redirect_to_other_domain(link_id):
+    url = redis.hget('test', link_id).decode()
     if not url:
         return "not url"
     return redirect(url)
+
+
+# @app.route('/api/v1/short/custom', methods=['GET']) TODO custom link
 
 
 @app.route('/api/v1/short', methods=['GET'])
 def make_short_link():
     if not request.args:
         return "no args"
+
     query_params = request.args.to_dict()
     full_link = query_params.get('link')
-    short_link = make_link_short(full_link)
+    link_id = write_link_db(full_link)
 
-    return short_link
+    return link_id
 
 
 @app.route('/api/v1/full', methods=['GET'])
@@ -46,10 +55,16 @@ def get_short_link():
         return "error"
     query_params = request.args.to_dict()
     link_id = query_params.get('id')
-    short_link = links.get(link_id)
+    short_link = redis.hget('test', link_id)
     if not short_link:
         return "error"
     return short_link
 
-if __name__ == '__main__':
+
+def main():
     app.run()
+
+
+if __name__ == '__main__':
+    main()
+
