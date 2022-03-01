@@ -1,22 +1,6 @@
-from flask import Flask, request, redirect
-from environs import Env
+from flask import request, redirect
 from hashlib import sha256
-from flask_redis import Redis
-
-app = Flask(__name__)
-
-env = Env()
-env.read_env()
-redis_host = env.str('REDIS_HOST')
-redis_port = env.str('REDIS_PORT')
-redis_password = env.str('REDIS_PASSWORD')
-app.config['REDIS_HOST'] = redis_host
-app.config['REDIS_PORT'] = redis_port
-app.config['REDIS_PASSWORD'] = redis_password
-
-redis = Redis(app)
-
-links = {}
+from api import app, redis
 
 
 def write_link_db(full_link):
@@ -46,7 +30,7 @@ def make_short_link():
     full_link = query_params.get('link')
     link_id = write_link_db(full_link)
 
-    return f'http://127.0.0.1/{link_id}'
+    return f'127.0.0.1:5000/{link_id}'
 
 
 @app.route('/api/v1/full', methods=['GET'])
