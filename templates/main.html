@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Я сейчас буду сокращать все ссылки!</title>
+</head>
+<body>
+
+Я сейчас буду сокращать все ссылки!
+<form action="/show_link" name="test" method="post">
+    <p>
+        <b>Ссылку можно печатать здесь. Если хотите, чтоб у ссылки было красивое имя, заполните и второе поле тоже</b>
+        <br>
+        <br>
+    <p>Ссылку печатать сюда:</p>
+        <input type="text" required="" name="link" size="40">
+        <br>
+    <p>Красивый адрес печатать сюда:</p>
+        <input type="text" name="link" size="40">
+    <p> <input type="submit" value="Нажми меня"></p>
+    {% if context:%}
+        <h3>Ваша ссылка: {{context}}</h3>
+    {% endif %}
+    </p>
+</form>
+</body>
+</html>

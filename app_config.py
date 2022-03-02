@@ -1,8 +1,8 @@
 from flask_redis import Redis
-from flask import Flask, url_for, current_app
+from flask import Flask
 from environs import Env
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 env = Env()
 env.read_env()

@@ -1,7 +1,7 @@
 import requests
-from flask import request, redirect, jsonify, send_from_directory
+from flask import request, redirect, jsonify, send_from_directory, render_template
 from hashlib import sha256
-from flask_server import app, redis
+from app_config import app, redis
 import os
 
 
@@ -35,6 +35,31 @@ def write_link_db(full_link, link_name):
 
     redis.hset(link_id, link_id, full_link)
     redis.hset(full_link, full_link, link_id)
+
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    return render_template('main.html')
+
+
+@app.route('/show_link', methods=['GET', 'POST'])
+def show_link():
+    full_link = request.form.get('link')
+    link_name = request.form.get('name')
+    if link_name:
+        check_if_custom_link_exist(link_name)
+        context = f'имя {link_name} занято'
+        return render_template('main.html', context=context)
+
+    response = check_link(full_link)
+    if not response:
+        context = f'Ошибка в написании ссылки {full_link}.'
+        return render_template('main.html', context=context)
+
+    link_id = sha256(full_link.encode()).hexdigest()[:8]
+    write_link_db(full_link, link_id)
+    context = f'127.0.0.1:5000/{link_id}'
+    return render_template('main.html', context=context)
 
 
 @app.route('/favicon.ico')
@@ -117,7 +142,7 @@ def get_short_link():
 
 
 def main():
-    app.run()
+    app.run(use_reloader=True)
 
 
 if __name__ == '__main__':
