@@ -1,7 +1,7 @@
 import requests
 from flask import request, redirect, jsonify, send_from_directory
 from hashlib import sha256
-from api import app, redis
+from flask_server import app, redis
 import os
 
 
@@ -12,20 +12,6 @@ class Responses:
     WRONG_QUERY_PARAMS = {'message': 'incorrect query params'}
     INCORRECT_LINK = {'message': 'incorrect link'}
     NAME_ALREADY_EXIST = {'message': 'please change name of your link'}
-
-
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
-
-@app.route('/<link_id>')
-def redirect_to_other_domain(link_id):
-    url = redis.hget(link_id, link_id).decode()
-    if not url:
-        return jsonify(Responses.NO_SUCH_SHORT_LINK)
-    return redirect(url)
 
 
 def check_if_custom_link_exist(link_name):
@@ -43,7 +29,7 @@ def check_link(full_link):
         return False
 
 
-def write_custom_link_db(full_link, link_name):
+def write_link_db(full_link, link_name):
 
     link_id = link_name
 
@@ -51,13 +37,18 @@ def write_custom_link_db(full_link, link_name):
     redis.hset(full_link, full_link, link_id)
 
 
-def write_link_db(full_link):
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-    link_id = sha256(full_link.encode()).hexdigest()[:8]
-    redis.hset(link_id, link_id, full_link)
-    redis.hset(full_link, full_link, link_id)
 
-    return link_id
+@app.route('/<link_id>')
+def redirect_to_other_domain(link_id):
+    url = redis.hget(link_id, link_id).decode()
+    if not url:
+        return jsonify(Responses.NO_SUCH_SHORT_LINK)
+    return redirect(url)
 
 
 @app.route('/api/custom', methods=['GET'])
@@ -82,7 +73,7 @@ def make_custom_link():
     if not check_link(full_link):
         return jsonify(Responses.INCORRECT_LINK)
 
-    write_custom_link_db(full_link, link_name)
+    write_link_db(full_link, link_name)
 
     return jsonify({'message': f'127.0.0.1:5000/{link_name}'})
 
@@ -101,7 +92,8 @@ def make_short_link():
     if not check_link(full_link):
         return jsonify(Responses.INCORRECT_LINK)
 
-    link_id = write_link_db(full_link)
+    link_id = sha256(full_link.encode()).hexdigest()[:8]
+    write_link_db(full_link, link_id)
 
     return f'127.0.0.1:5000/{link_id}'
 
@@ -128,7 +120,5 @@ def main():
     app.run()
 
 
-
 if __name__ == '__main__':
     main()
-
