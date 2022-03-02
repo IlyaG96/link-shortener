@@ -46,19 +46,33 @@ def index():
 def show_link():
     full_link = request.form.get('link')
     link_name = request.form.get('name')
-    if link_name:
-        check_if_custom_link_exist(link_name)
-        context = f'имя {link_name} занято'
+
+    if not link_name:
+        link_name = sha256(full_link.encode()).hexdigest()[:8]
+        is_link_correct = check_link(full_link)
+        if not is_link_correct:
+            context = f'Ошибка в написании ссылки {full_link}.'
+            return render_template('main.html', context=context)
+
+        write_link_db(full_link, link_name)
+        context = f'127.0.0.1:5000/{link_name}'
+
         return render_template('main.html', context=context)
 
-    response = check_link(full_link)
-    if not response:
+    if check_if_custom_link_exist(link_name):
+        context = f'имя {link_name} занято'  # TODO check correct link grammar
+
+        return render_template('main.html', context=context)
+
+    is_link_correct = check_link(full_link)
+
+    if not is_link_correct:
         context = f'Ошибка в написании ссылки {full_link}.'
         return render_template('main.html', context=context)
 
-    link_id = sha256(full_link.encode()).hexdigest()[:8]
-    write_link_db(full_link, link_id)
-    context = f'127.0.0.1:5000/{link_id}'
+    write_link_db(full_link, link_name)
+    context = f'127.0.0.1:5000/{link_name}'
+
     return render_template('main.html', context=context)
 
 
