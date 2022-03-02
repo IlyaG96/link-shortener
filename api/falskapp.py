@@ -11,6 +11,7 @@ class Responses:
     INCORRECT_QUERY_PARAMS = {'message': 'incorrect query params'}
     WRONG_QUERY_PARAMS = {'message': 'incorrect query params'}
     INCORRECT_LINK = {'message': 'incorrect link'}
+    NAME_ALREADY_EXIST = {'message': 'please change name of your link'}
 
 
 @app.route('/favicon.ico')
@@ -25,6 +26,10 @@ def redirect_to_other_domain(link_id):
     if not url:
         return jsonify(Responses.NO_SUCH_SHORT_LINK)
     return redirect(url)
+
+
+def check_if_custom_link_exist(link_name):
+    return redis.hget(link_name, link_name)
 
 
 def check_link(full_link):
@@ -65,6 +70,9 @@ def make_custom_link():
     full_link = query_params.get('link')
 
     link_name = query_params.get('name')
+
+    if check_if_custom_link_exist(link_name):
+        return jsonify(Responses.NAME_ALREADY_EXIST)
 
     if not (full_link or link_name):
         return jsonify(Responses.WRONG_QUERY_PARAMS)
