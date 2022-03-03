@@ -1,8 +1,9 @@
 import requests
-from flask import request, redirect, jsonify, send_from_directory, render_template, Flask
+from flask import request, redirect, jsonify, send_from_directory, render_template, Flask, abort
 from hashlib import sha256
 from urllib.parse import urljoin
 from flask_redis import Redis
+from werkzeug.exceptions import HTTPException
 import validators
 import os
 import re
@@ -99,10 +100,13 @@ def favicon():
 
 @app.route('/<link_id>')
 def redirect_to_other_domain(link_id):
-    url = redis.hget(link_id, link_id).decode()
+
+    url = redis.hget(link_id, link_id)
+
     if not url:
         return jsonify(Responses.NO_SUCH_SHORT_LINK)
-    return redirect(url)
+
+    return redirect(url.decode())
 
 
 @app.route('/api/custom', methods=['GET'])
@@ -114,10 +118,12 @@ def make_custom_link():
 
     full_link = query_params.get('link')
 
-    link_name = query_params.get('name').replace(' ', '')
+    link_name = query_params.get('name')
 
-    if not (full_link or link_name):
+    if not full_link or not link_name:
         return jsonify(Responses.WRONG_QUERY_PARAMS)
+
+    link_name = link_name.replace(' ', '')
 
     if not check_name(link_name):
         return jsonify(Responses.NAME_ERROR)
@@ -166,6 +172,17 @@ def get_short_link():
         return jsonify(Responses.NO_SUCH_SHORT_LINK)
 
     return jsonify({full_link: link_name})
+
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    response = {
+        "code": e.code,
+        "name": e.name,
+        "description": e.description,
+    }
+
+    return jsonify(response)
 
 
 def main():
