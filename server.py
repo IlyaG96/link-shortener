@@ -11,7 +11,6 @@ import re
 
 app = create_app()
 redis = Redis()
-redis.init_app(app)
 
 
 class Responses:
