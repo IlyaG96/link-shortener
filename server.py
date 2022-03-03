@@ -1,7 +1,8 @@
 import requests
-from flask import request, redirect, jsonify, send_from_directory, render_template
+from flask import request, redirect, jsonify, send_from_directory, render_template, current_app
 from hashlib import sha256
 from app_config import app, redis
+from urllib.parse import urljoin
 import validators
 import os
 import re
@@ -59,27 +60,28 @@ def show_link():
         link_name = sha256(full_link.encode()).hexdigest()[:8]
         is_link_correct = check_link(full_link)
         if not is_link_correct:
-            context = f'Ошибка в написании ссылки {full_link}.'
+            context = f'Ошибка в написании ссылки "{full_link}".'
             return render_template('main.html', context=context)
 
         write_link_db(full_link, link_name)
-        context = f'127.0.0.1:5000/{link_name}'
+        context = urljoin(app['SERVER_NAME'], link_name)
 
         return render_template('main.html', context=context)
 
     if not check_name(link_name):
-        context = f'имя {link_name} занято или в имени используются недопустимые символы'
+        context = f'имя "{link_name}" занято или в имени используются недопустимые символы. ' \
+                  f'Используйте только латинские символы'
 
         return render_template('main.html', context=context)
 
     is_link_correct = check_link(full_link)
 
     if not is_link_correct:
-        context = f'Ошибка в написании ссылки {full_link}.'
+        context = f'Ошибка в написании ссылки "{full_link}".'
         return render_template('main.html', context=context)
 
     write_link_db(full_link, link_name)
-    context = f'127.0.0.1:5000/{link_name}'
+    context = urljoin(app['SERVER_NAME'], link_name)
 
     return render_template('main.html', context=context)
 
@@ -113,8 +115,6 @@ def make_custom_link():
         return jsonify(Responses.WRONG_QUERY_PARAMS)
 
     if not check_name(link_name):
-        print("not")
-        print(check_name(link_name))
         return jsonify(Responses.NAME_ERROR)
 
     if not check_link(full_link):
@@ -139,10 +139,10 @@ def make_short_link():
     if not check_link(full_link):
         return jsonify(Responses.INCORRECT_LINK)
 
-    link_id = sha256(full_link.encode()).hexdigest()[:8]
-    write_link_db(full_link, link_id)
+    link_name = sha256(full_link.encode()).hexdigest()[:8]
+    write_link_db(full_link, link_name)
 
-    return f'127.0.0.1:5000/{link_id}'
+    return f'127.0.0.1:5000/{link_name}'
 
 
 @app.route('/api/get-short', methods=['GET'])
@@ -155,12 +155,12 @@ def get_short_link():
     if not full_link:
         return jsonify(Responses.WRONG_QUERY_PARAMS)
 
-    link_id = redis.hget(full_link, full_link).decode()
+    link_name = redis.hget(full_link, full_link).decode()
 
-    if not link_id:
+    if not link_name:
         return jsonify(Responses.NO_SUCH_SHORT_LINK)
 
-    return jsonify({full_link: link_id})
+    return jsonify({full_link: link_name})
 
 
 def main():
