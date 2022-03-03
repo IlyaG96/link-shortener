@@ -44,7 +44,7 @@ def index():
 @app.route('/show_link', methods=['GET', 'POST'])
 def show_link():
     full_link = request.form.get('link')
-    link_name = request.form.get('name')
+    link_name = request.form.get('link-name')
 
     if not link_name:
         link_name = sha256(full_link.encode()).hexdigest()[:8]

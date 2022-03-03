@@ -3,21 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <title>Я сейчас буду сокращать все ссылки!</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        let pattern =  /^([ \u0400-\u04FF])*$/;
+        let pattern2 = /^([ ])*$/;
+
+        $(document).ready(function() {
+            $('#form-validate').submit(function() {
+                if (pattern.test($('input#link-name').val())) {
+                    alert('Кириллица недопустима');
+                    $('input#link-name').val("")
+                    return false;
+                }
+
+            });
+
+        });
+        $(document).ready(function() {
+            $('#form-validate').submit(function() {
+                if (pattern2.test($('input#link-name').val())) {
+                    alert('Пробелы недопустимы');
+                    $('input#link-name').val("")
+                    return false;
+                }
+
+            });
+
+        });
+    </script>
 </head>
 <body>
 
 Я сейчас буду сокращать все ссылки!
-<form action="/show_link" name="test" method="post">
+
+
+<form action="/show_link" name="test" method="post" id="form-validate">
     <p>
         <b>Ссылку можно печатать здесь. Если хотите, чтоб у ссылки было красивое имя, заполните и второе поле тоже</b>
         <br>
         <br>
     <p>Ссылку печатать сюда:</p>
-        <input type="text" required="" name="link" size="40">
+        <input type="text" name="link" size="40">
         <br>
     <p>Красивый адрес печатать сюда:</p>
-        <input type="text" name="name" size="40">
-    <p> <input type="submit" value="Нажми меня"></p>
+        <input type="text" name="link-name" size="40" class="input" id="link-name">
+    <p> <button class="submit">Нажми</button></p>
     {% if context:%}
         <h3>Ваша ссылка: {{context}}</h3>
     {% endif %}
