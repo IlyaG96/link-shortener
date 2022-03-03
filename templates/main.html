@@ -6,23 +6,11 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script type="text/javascript">
         let pattern =  /^([ \u0400-\u04FF])*$/;
-        let pattern2 = /^([ ])*$/;
 
         $(document).ready(function() {
             $('#form-validate').submit(function() {
                 if (pattern.test($('input#link-name').val())) {
                     alert('Кириллица недопустима');
-                    $('input#link-name').val("")
-                    return false;
-                }
-
-            });
-
-        });
-        $(document).ready(function() {
-            $('#form-validate').submit(function() {
-                if (pattern2.test($('input#link-name').val())) {
-                    alert('Пробелы недопустимы');
                     $('input#link-name').val("")
                     return false;
                 }
