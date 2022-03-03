@@ -3,4 +3,4 @@ environs==9.5.0
 requests==2.27.1
 Flask-And-Redis==1.0.0
 environs==9.5.0
-python-telegram-bot==13.11
+validators==0.18.2

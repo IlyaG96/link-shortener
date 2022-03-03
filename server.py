@@ -2,6 +2,7 @@ import requests
 from flask import request, redirect, jsonify, send_from_directory, render_template
 from hashlib import sha256
 from app_config import app, redis
+import validators
 import os
 
 
@@ -14,12 +15,10 @@ class Responses:
     NAME_ALREADY_EXIST = {'message': 'please change name of your link'}
 
 
-def check_if_custom_link_exist(link_name):
-    return redis.hget(link_name, link_name)
-
-
 def check_link(full_link):
 
+    if not validators.url(full_link):
+        return False
     try:
         response = requests.get(full_link, timeout=2)
         response.raise_for_status()
@@ -59,7 +58,7 @@ def show_link():
 
         return render_template('main.html', context=context)
 
-    if check_if_custom_link_exist(link_name):
+    if redis.hget(link_name, link_name):
         context = f'имя {link_name} занято'  # TODO check correct link grammar
 
         return render_template('main.html', context=context)
@@ -101,7 +100,7 @@ def make_custom_link():
 
     link_name = query_params.get('name')
 
-    if check_if_custom_link_exist(link_name):
+    if redis.hget(link_name, link_name):
         return jsonify(Responses.NAME_ALREADY_EXIST)
 
     if not (full_link or link_name):
