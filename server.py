@@ -1,12 +1,16 @@
 import requests
-from flask import request, redirect, jsonify, send_from_directory, render_template, current_app
+from flask import request, redirect, jsonify, send_from_directory, render_template, Flask
 from hashlib import sha256
-from app_config import app, redis
 from urllib.parse import urljoin
+from flask_redis import Redis
 import validators
 import os
 import re
-# TODO check remove russian symbols
+
+
+app = Flask(__name__)
+redis = Redis(app)
+app.config.from_object('config.DevConfig')
 
 
 class Responses:
