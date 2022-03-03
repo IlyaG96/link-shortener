@@ -9,8 +9,9 @@ import re
 
 
 app = Flask(__name__)
-redis = Redis(app)
+redis = Redis()
 app.config.from_object('config.DevConfig')
+redis.init_app(app)
 
 
 class Responses:
@@ -68,7 +69,7 @@ def show_link():
             return render_template('main.html', context=context)
 
         write_link_db(full_link, link_name)
-        context = urljoin(app['SERVER_NAME'], link_name)
+        context = urljoin('http://localhost:5000', link_name)
 
         return render_template('main.html', context=context)
 
@@ -85,7 +86,7 @@ def show_link():
         return render_template('main.html', context=context)
 
     write_link_db(full_link, link_name)
-    context = urljoin(app['SERVER_NAME'], link_name)
+    context = urljoin('http://localhost:5000', link_name)
 
     return render_template('main.html', context=context)
 
