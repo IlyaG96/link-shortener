@@ -20,8 +20,7 @@ class Responses:
 def check_name(link_name):
 
     pattern = '[0-9A-Za-z]'
-    if re.fullmatch(pattern, link_name):
-        print("got it")
+    if re.match(pattern, link_name):
         return not redis.hget(link_name, link_name)
 
 
@@ -68,7 +67,7 @@ def show_link():
 
         return render_template('main.html', context=context)
 
-    if check_name(link_name):
+    if not check_name(link_name):
         context = f'имя {link_name} занято или в имени используются недопустимые символы'
 
         return render_template('main.html', context=context)
@@ -114,6 +113,8 @@ def make_custom_link():
         return jsonify(Responses.WRONG_QUERY_PARAMS)
 
     if not check_name(link_name):
+        print("not")
+        print(check_name(link_name))
         return jsonify(Responses.NAME_ERROR)
 
     if not check_link(full_link):
