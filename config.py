@@ -1,8 +1,5 @@
-"""Flask configuration."""
-from os import environ, path
-from flask_redis import Redis
+from os import path
 from environs import Env
-from flask_redis import Redis
 
 
 env = Env()
