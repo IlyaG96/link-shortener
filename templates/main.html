@@ -5,19 +5,23 @@
     <title>Я сейчас буду сокращать все ссылки!</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script type="text/javascript">
-        let pattern =  /^([ \u0400-\u04FF])*$/;
+        function validateLink(evt) {
+            var theEvent = evt || window.event;
 
-        $(document).ready(function() {
-            $('#form-validate').submit(function() {
-                if (pattern.test($('input#link-name').val())) {
-                    alert('Кириллица недопустима');
-                    $('input#link-name').val("")
-                    return false;
-                }
-
-            });
-
-        });
+            // Handle paste
+            if (theEvent.type === 'paste') {
+                key = event.clipboardData.getData('text/plain');
+            } else {
+                // Handle key press
+                var key = theEvent.keyCode || theEvent.which;
+                key = String.fromCharCode(key);
+            }
+            var regex = /[0-9A-Za-z]|\./;
+            if( !regex.test(key) ) {
+                theEvent.returnValue = false;
+                if(theEvent.preventDefault) theEvent.preventDefault();
+            }
+        }
     </script>
 </head>
 <body>
@@ -25,7 +29,7 @@
 Я сейчас буду сокращать все ссылки!
 
 
-<form action="/show_link" name="test" method="post" id="form-validate">
+<form action="/show_link" name="test" method="post">
     <p>
         <b>Ссылку можно печатать здесь. Если хотите, чтоб у ссылки было красивое имя, заполните и второе поле тоже</b>
         <br>
@@ -34,7 +38,7 @@
         <input type="text" name="link" size="40">
         <br>
     <p>Красивый адрес печатать сюда:</p>
-        <input type="text" name="link-name" size="40" class="input" id="link-name">
+        <input type="text" name="link-name" size="40" onkeypress='validateName(event)'>
     <p> <button class="submit">Нажми</button></p>
     {% if context:%}
         <h3>Ваша ссылка: {{context}}</h3>

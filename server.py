@@ -4,6 +4,8 @@ from hashlib import sha256
 from app_config import app, redis
 import validators
 import os
+import re
+# TODO check remove russian symbols
 
 
 class Responses:
@@ -12,7 +14,15 @@ class Responses:
     INCORRECT_QUERY_PARAMS = {'message': 'incorrect query params'}
     WRONG_QUERY_PARAMS = {'message': 'incorrect query params'}
     INCORRECT_LINK = {'message': 'incorrect link'}
-    NAME_ALREADY_EXIST = {'message': 'please change name of your link'}
+    NAME_ERROR = {'message': 'this name is already exists or have errors (use only nums and latin symbols)'}
+
+
+def check_name(link_name):
+
+    pattern = '[0-9A-Za-z]'
+    if re.fullmatch(pattern, link_name):
+        print("got it")
+        return not redis.hget(link_name, link_name)
 
 
 def check_link(full_link):
@@ -44,7 +54,7 @@ def index():
 @app.route('/show_link', methods=['GET', 'POST'])
 def show_link():
     full_link = request.form.get('link')
-    link_name = request.form.get('link-name')
+    link_name = request.form.get('link-name').replace(' ', '')
 
     if not link_name:
         link_name = sha256(full_link.encode()).hexdigest()[:8]
@@ -58,8 +68,8 @@ def show_link():
 
         return render_template('main.html', context=context)
 
-    if redis.hget(link_name, link_name):
-        context = f'имя {link_name} занято'  # TODO check correct link grammar
+    if check_name(link_name):
+        context = f'имя {link_name} занято или в имени используются недопустимые символы'
 
         return render_template('main.html', context=context)
 
@@ -98,15 +108,13 @@ def make_custom_link():
 
     full_link = query_params.get('link')
 
-    link_name = query_params.get('name')
-
-    if redis.hget(link_name, link_name):
-        return jsonify(Responses.NAME_ALREADY_EXIST)
+    link_name = query_params.get('name').replace(' ', '')
 
     if not (full_link or link_name):
         return jsonify(Responses.WRONG_QUERY_PARAMS)
 
-    check_link(full_link)
+    if not check_name(link_name):
+        return jsonify(Responses.NAME_ERROR)
 
     if not check_link(full_link):
         return jsonify(Responses.INCORRECT_LINK)
