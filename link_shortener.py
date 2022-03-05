@@ -1,5 +1,5 @@
 import requests
-from flask import request, redirect, jsonify, send_from_directory, render_template, Blueprint
+from flask import request, redirect, jsonify, send_from_directory, render_template, Blueprint, Flask
 from hashlib import sha256
 from urllib.parse import urljoin
 from werkzeug.exceptions import HTTPException
@@ -10,7 +10,8 @@ import re
 
 
 bp = Blueprint(name='link-shortener', import_name=__name__)
-redis = Redis()
+app = Flask(__name__)
+redis = Redis(app)
 
 
 class Responses:
