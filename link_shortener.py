@@ -25,7 +25,7 @@ class Responses:
 
 def check_name(link_name):
 
-    pattern = '[0-9A-Za-z]'
+    pattern = '[0-9A-Za-z-]'
     if re.match(pattern, link_name):
         return not redis.hget(link_name, link_name)
 
