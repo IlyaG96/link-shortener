@@ -164,7 +164,7 @@ def make_short_link():
     link_name = sha256(full_link.encode()).hexdigest()[:8]
     write_link_db(full_link, link_name)
 
-    return Responses.send_link_json(link_name)
+    return jsonify(Responses.send_link_json(link_name))
 
 
 @bp.errorhandler(HTTPException)
