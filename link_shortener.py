@@ -71,6 +71,12 @@ def show_link():
     full_link = request.form.get('link')
     link_name = request.form.get('link-name').replace(' ', '')
 
+    is_link_correct = check_link(full_link)
+
+    if not is_link_correct:
+        context = f'Ошибка в написании ссылки "{full_link}".'
+        return render_template('main.html', context=context)
+
     if not link_name:
         link_name = sha256(full_link.encode()).hexdigest()[:8]
         is_link_correct = check_link(full_link)
@@ -90,12 +96,6 @@ def show_link():
         Используйте только латинские символы, цифры и знак '-'.
             ''')
 
-        return render_template('main.html', context=context)
-
-    is_link_correct = check_link(full_link)
-
-    if not is_link_correct:
-        context = f'Ошибка в написании ссылки "{full_link}".'
         return render_template('main.html', context=context)
 
     write_link_db(full_link, link_name)
