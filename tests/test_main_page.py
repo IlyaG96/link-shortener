@@ -5,7 +5,7 @@ import pytest
 from app_factory import create_app
 from link_shortener import Responses
 
-TEST_LINK_NAME = ''.join(random.choice(ascii_letters) for i in range(10))
+TEST_LINK_NAME = ''.join(random.choice(ascii_letters) for letter in range(10))
 
 
 @pytest.fixture
