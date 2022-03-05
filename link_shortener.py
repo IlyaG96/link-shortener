@@ -173,11 +173,11 @@ def get_short_link():
 
 
 @bp.errorhandler(HTTPException)
-def handle_exception(e):
+def handle_exception(exception):
     response = {
-        "code": e.code,
-        "name": e.name,
-        "description": e.description,
+        "code": exception.code,
+        "name": exception.name,
+        "description": exception.description,
     }
 
     return jsonify(response)

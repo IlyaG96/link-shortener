@@ -8,7 +8,6 @@ basedir = path.abspath(path.dirname(__file__))
 
 
 class Config:
-    """Base config."""
     SECRET_KEY = env.str('SECRET_KEY')
     STATIC_FOLDER = 'static'
     TEMPLATES_FOLDER = 'templates'
