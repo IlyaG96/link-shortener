@@ -16,7 +16,7 @@ redis = Redis(app)
 
 class Responses:
     NO_SUCH_SHORT_LINK = {'message': 'no such short link in database'}
-    NOT_QUERY_PARAMS = {'message': 'have not got query params'}
+    NO_QUERY_PARAMS = {'message': 'have not got query params'}
     INCORRECT_QUERY_PARAMS = {'message': 'incorrect query params'}
     WRONG_QUERY_PARAMS = {'message': 'incorrect query params'}
     INCORRECT_LINK = {'message': 'incorrect link'}
@@ -123,7 +123,7 @@ def redirect_to_other_domain(link_id):
 @bp.route('/api/custom', methods=['GET'])
 def make_custom_link():
     if not request.args:
-        return jsonify(Responses.NOT_QUERY_PARAMS)
+        return jsonify(Responses.NO_QUERY_PARAMS)
 
     query_params = request.args.to_dict()
 
@@ -150,7 +150,7 @@ def make_custom_link():
 @bp.route('/api/make-short', methods=['GET'])
 def make_short_link():
     if not request.args:
-        return jsonify(Responses.NOT_QUERY_PARAMS)
+        return jsonify(Responses.NO_QUERY_PARAMS)
 
     query_params = request.args.to_dict()
     full_link = query_params.get('link')
