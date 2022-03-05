@@ -22,6 +22,19 @@ class Responses:
     INCORRECT_LINK = {'message': 'incorrect link'}
     NAME_ERROR = {'message': 'this name is already exists or have errors (use only nums and latin symbols)'}
 
+    def __init__(self, link_name):
+        self.link_name = link_name
+
+    @staticmethod
+    def send_link(link_name):
+        return urljoin('http://127.0.0.1:5000', link_name)
+
+    @staticmethod
+    def send_link_json(link_name):
+        return {
+            'message': urljoin('http://127.0.0.1:5000', link_name)
+        }
+
 
 def check_name(link_name):
 
@@ -69,7 +82,7 @@ def show_link():
             return render_template('main.html', context=context)
 
         write_link_db(full_link, link_name)
-        context = urljoin('http://localhost:5000', link_name)
+        context = Responses.send_link(link_name)
 
         return render_template('main.html', context=context)
 
@@ -86,7 +99,7 @@ def show_link():
         return render_template('main.html', context=context)
 
     write_link_db(full_link, link_name)
-    context = urljoin('http://localhost:5000', link_name)
+    context = Responses.send_link(link_name)
 
     return render_template('main.html', context=context)
 
@@ -132,7 +145,7 @@ def make_custom_link():
 
     write_link_db(full_link, link_name)
 
-    return jsonify({'message': f'127.0.0.1:5000/{link_name}'})
+    return jsonify(Responses.send_link_json(link_name))
 
 
 @bp.route('/api/make-short', methods=['GET'])
@@ -152,33 +165,15 @@ def make_short_link():
     link_name = sha256(full_link.encode()).hexdigest()[:8]
     write_link_db(full_link, link_name)
 
-    return f'127.0.0.1:5000/{link_name}'
-
-
-@bp.route('/api/get-short', methods=['GET'])
-def get_short_link():
-    if not request.args:
-        return jsonify(Responses.NOT_QUERY_PARAMS)
-    query_params = request.args.to_dict()
-    full_link = query_params.get('link')
-
-    if not full_link:
-        return jsonify(Responses.WRONG_QUERY_PARAMS)
-
-    link_name = redis.hget(full_link, full_link).decode()
-
-    if not link_name:
-        return jsonify(Responses.NO_SUCH_SHORT_LINK)
-
-    return jsonify({full_link: link_name})
+    return Responses.send_link_json(link_name)
 
 
 @bp.errorhandler(HTTPException)
 def handle_exception(exception):
     response = {
-        "code": exception.code,
-        "name": exception.name,
-        "description": exception.description,
+        'code': exception.code,
+        'name': exception.name,
+        'description': exception.description,
     }
 
     return jsonify(response)
