@@ -4,10 +4,10 @@ from hashlib import sha256
 from urllib.parse import urljoin
 from werkzeug.exceptions import HTTPException
 from flask_redis import Redis
+from textwrap import dedent
 import validators
 import os
 import re
-
 
 bp = Blueprint(name='link-shortener', import_name=__name__)
 app = Flask(__name__)
@@ -37,14 +37,12 @@ class Responses:
 
 
 def check_name(link_name):
-
     pattern = '[0-9A-Za-z-]'
     if re.match(pattern, link_name):
         return not redis.hget(link_name, link_name)
 
 
 def check_link(full_link):
-
     if not validators.url(full_link):
         return False
     try:
@@ -57,7 +55,6 @@ def check_link(full_link):
 
 
 def write_link_db(full_link, link_name):
-
     link_id = link_name
 
     redis.hset(link_id, link_id, full_link)
@@ -87,8 +84,11 @@ def show_link():
         return render_template('main.html', context=context)
 
     if not check_name(link_name):
-        context = f'имя "{link_name}" занято или в имени используются недопустимые символы. ' \
-                  f'Используйте только латинские символы'
+        context = dedent(
+            f'''
+        Имя "{link_name}" занято или в имени используются недопустимые символы. ' \
+        Используйте только латинские символы, цифры и знак '-'.
+            ''')
 
         return render_template('main.html', context=context)
 
@@ -112,7 +112,6 @@ def favicon():
 
 @bp.route('/<link_id>')
 def redirect_to_other_domain(link_id):
-
     url = redis.hget(link_id, link_id)
 
     if not url:
