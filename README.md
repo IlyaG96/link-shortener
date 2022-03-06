@@ -60,6 +60,7 @@ python app_factory.py
 </details>
 
 ### API
+
 <details>
 
 <summary>Примеры использования API</summary>
@@ -93,6 +94,7 @@ python app_factory.py
 `http://127.0.0.1:5000/my-link-name/05046f26`  
 
 #### Статусы ответов:
+
 `200 ОК` - в случае, если нет ошибок в API.  
 `302 FOUND` - если ссылка существует и происходит переход по ней.  
 `404 NOT FOUND` - в случае, если в API есть ошибка.  
@@ -101,6 +103,7 @@ python app_factory.py
 
 
 ### Тесты
+
 <details>
 
 <summary>Тестирование приложения</summary>
@@ -113,6 +116,8 @@ python app_factory.py
 1) Смените директорию на `tests`
 2) запустите тесты командой:
 ```shell
-python pytest test_api
+python pytest test_api.py
 ```
 </details>
+
+## Вероятные сценарии использования

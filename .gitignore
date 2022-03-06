@@ -3,3 +3,6 @@ env
 __pycache__
 .idea
 .pytest_cache
+wsgi.py
+link-shortener.ini
+link-shortener.sock
