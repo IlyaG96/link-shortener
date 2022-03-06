@@ -67,11 +67,6 @@ def test_get_not_existed_link_db_custom(client):
     assert Responses.NO_SUCH_SHORT_LINK == response.json
 
 
-def test_existed_link_in_query_params(client):
-    response = client.get('/api/custom?link=https://google.com')
-    assert Responses.WRONG_QUERY_PARAMS == response.json
-
-
 def test_no_query_params_auto(client):
     response = client.get('/api/make-short')
     assert Responses.NO_QUERY_PARAMS == response.json
