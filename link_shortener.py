@@ -79,7 +79,6 @@ def show_link():
 
     if not link_name:
         link_name = sha256(full_link.encode()).hexdigest()[:8]
-        is_link_correct = check_link(full_link)
         if not is_link_correct:
             context = f'Ошибка в написании ссылки "{full_link}".'
             return render_template('main.html', context=context)
@@ -92,7 +91,7 @@ def show_link():
     if not check_name(link_name):
         context = dedent(
             f'''
-        Имя "{link_name}" занято или в имени используются недопустимые символы. ' \
+        Имя "{link_name}" занято или в имени используются недопустимые символы. ' 
         Используйте только латинские символы, цифры и знак '-'.
             ''')
 
