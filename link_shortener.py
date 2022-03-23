@@ -54,6 +54,10 @@ def check_link(full_link):
         return False
 
 
+def is_short_link_exist(link):
+    return '127.0.0.1' in link
+
+
 def write_link_db(full_link, link_name):
     link_id = link_name
 
@@ -70,6 +74,10 @@ def index():
 def show_link():
     full_link = request.form.get('link')
     link_name = request.form.get('link-name').replace(' ', '')
+
+    if is_short_link_exist(full_link):
+        context = f'Вы ввели уже сокращенную ссылку: "{full_link}".'
+        return render_template('main.html', context=context)
 
     is_link_correct = check_link(full_link)
 
